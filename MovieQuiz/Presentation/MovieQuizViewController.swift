@@ -6,21 +6,25 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet weak private var counterLabel: UILabel!
     
     @IBAction private func yesButtonClicked(_ sender: Any) {
-        
+        let currentQuestion = questions[currentQuestionIndex]
+        let givenAnswer = true
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     @IBAction private func noButtonClicked(_ sender: Any) {
-        
+        let currentQuestion = questions[currentQuestionIndex]
+        let givenAnswer = false
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
+    
+    private var currentQuestionIndex = 0
+    private var correctAnswers = 0
     
     private struct QuizQuestion {
         let image: String
         let text: String
         let correctAnswer: Bool
     }
-    
-    private var currentQuestionIndex = 0
-    private var correctAnswers = 0
     
     private struct QuizStepViewModel {
         let image: UIImage
@@ -50,6 +54,13 @@ final class MovieQuizViewController: UIViewController {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
+    }
+    
+    private func showAnswerResult(isCorrect: Bool) {
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 8
+        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        imageView.layer.cornerRadius = 20
     }
     
     // MARK: - Lifecycle
