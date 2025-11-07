@@ -20,16 +20,22 @@ final class MovieQuizViewController: UIViewController {
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     
-    private struct QuizQuestion {
+    struct QuizQuestion {
         let image: String
         let text: String
         let correctAnswer: Bool
     }
     
-    private struct QuizStepViewModel {
+    struct QuizStepViewModel {
         let image: UIImage
         let question: String
         let questionNumber: String
+    }
+    
+    struct QuizResultsViewModel {
+        let title: String
+        let textScorePoints: String
+        let buttonText: String
     }
     
     private let questions: [QuizQuestion] = [
@@ -56,28 +62,55 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
     }
     
+    private func show(quiz result: QuizResultsViewModel) {
+        let alert = UIAlertController(
+            title: result.title,
+            message: result.textScorePoints,
+            preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            
+            //заново показываем первый вопрос
+            let firstQuestion = self.questions[self.currentQuestionIndex]
+            let viewModel = self.convert(model: firstQuestion)
+            self.show(quiz: viewModel)
+        }
+        
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     private func showAnswerResult(isCorrect: Bool) {
+        if isCorrect { correctAnswers += 1}
+        
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         imageView.layer.cornerRadius = 20
         
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
+            self.imageView.layer.borderColor = UIColor.clear.cgColor
         }
     }
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questions.count - 1 {
-            
+            let text = "Ваш результат: \(correctAnswers)/10"
+            show(quiz: QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                textScorePoints: text,
+                buttonText: "Сыграть еще раз?"))
         } else {
             currentQuestionIndex += 1
             let viewModelOfNextQuestion = convert(model: questions[currentQuestionIndex])
             show(quiz: viewModelOfNextQuestion)
-            
         }
     }
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
