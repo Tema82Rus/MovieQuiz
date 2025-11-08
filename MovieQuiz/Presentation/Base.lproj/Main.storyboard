@@ -125,6 +125,8 @@
                         <outlet property="counterLabel" destination="OWQ-tR-sH5" id="3gN-6B-LAU"/>
                         <outlet property="imageView" destination="noh-aU-235" id="XyL-11-GEg"/>
                         <outlet property="textLabel" destination="qYe-07-bCy" id="iwA-H9-rJ0"/>
+                        <outletCollection property="buttons" destination="HWe-Iz-xhc" collectionClass="NSMutableArray" id="IZj-zo-dqP"/>
+                        <outletCollection property="buttons" destination="WU3-s3-12M" collectionClass="NSMutableArray" id="Rx2-2g-Opp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -5,13 +5,18 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
     
+    @IBOutlet var buttons: [UIButton]!
+    
+    
     @IBAction private func yesButtonClicked(_ sender: Any) {
+        buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
         let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = true
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     @IBAction private func noButtonClicked(_ sender: Any) {
+        buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
         let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = false
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
@@ -93,6 +98,7 @@ final class MovieQuizViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
             self.imageView.layer.borderColor = UIColor.clear.cgColor
+            self.buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
         }
     }
     
