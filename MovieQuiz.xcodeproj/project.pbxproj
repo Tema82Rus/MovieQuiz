@@ -19,6 +19,7 @@
 		BC54D04F2ECCA44D00111B2D /* QuizStepViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC54D04E2ECCA44D00111B2D /* QuizStepViewModel.swift */; };
 		BC54D0512ECCA47300111B2D /* QuizResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC54D0502ECCA47300111B2D /* QuizResultsViewModel.swift */; };
 		BC54D0532ECCA48200111B2D /* QuizQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC54D0522ECCA48200111B2D /* QuizQuestion.swift */; };
+		BC54D0552ECCCE0000111B2D /* QuestionFactoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC54D0542ECCCE0000111B2D /* QuestionFactoryProtocol.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		BC54D04E2ECCA44D00111B2D /* QuizStepViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizStepViewModel.swift; sourceTree = "<group>"; };
 		BC54D0502ECCA47300111B2D /* QuizResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizResultsViewModel.swift; sourceTree = "<group>"; };
 		BC54D0522ECCA48200111B2D /* QuizQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestion.swift; sourceTree = "<group>"; };
+		BC54D0542ECCCE0000111B2D /* QuestionFactoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactoryProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -57,6 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				BC54D04B2ECC981200111B2D /* QuestionFactory.swift */,
+				BC54D0542ECCCE0000111B2D /* QuestionFactoryProtocol.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -213,6 +216,7 @@
 				BC54D0512ECCA47300111B2D /* QuizResultsViewModel.swift in Sources */,
 				BC54D04C2ECC981200111B2D /* QuestionFactory.swift in Sources */,
 				AD1ABAB42831907B00B3E448 /* SceneDelegate.swift in Sources */,
+				BC54D0552ECCCE0000111B2D /* QuestionFactoryProtocol.swift in Sources */,
 				BC54D04F2ECCA44D00111B2D /* QuizStepViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
