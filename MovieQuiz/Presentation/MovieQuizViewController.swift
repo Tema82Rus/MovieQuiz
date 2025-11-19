@@ -1,18 +1,19 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+    // MARK: - Private property
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
-    
     @IBOutlet var buttons: [UIButton]!
-    
     private var correctAnswers = 0
     private var currentQuestionIndex = 0
-    private var questionsAmount: Int = 10
-    private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
+    private let questionsAmount: Int = 10
+    private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
+    
+    // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: Any) {
         buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
         guard let currentQuestion = currentQuestion else { return }
@@ -26,7 +27,7 @@ final class MovieQuizViewController: UIViewController {
         let givenAnswer = false
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
-    
+    // MARK: - Private functions
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionShip = QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(),
                                              question: model.text,
@@ -52,11 +53,7 @@ final class MovieQuizViewController: UIViewController {
             self.correctAnswers = 0
             
             //заново показываем первый вопрос
-            if let firstQuestion = self.questionFactory.requestNextQuestion() {
-                self.currentQuestion = firstQuestion
-                let viewModel = self.convert(model: firstQuestion)
-                self.show(quiz: viewModel)
-            }
+            questionFactory?.requestNextQuestion()
         }
         
         alert.addAction(action)
@@ -90,20 +87,30 @@ final class MovieQuizViewController: UIViewController {
                 buttonText: "Сыграть еще раз?"))
         } else {
             currentQuestionIndex += 1
-            if let nextQuestion = questionFactory.requestNextQuestion() {
-                currentQuestion = nextQuestion
-                let viewModel = convert(model: nextQuestion)
-                show(quiz: viewModel)
-            }
+            questionFactory?.requestNextQuestion()
         }
     }
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let firstQuestion = questionFactory.requestNextQuestion() {
-            currentQuestion = firstQuestion
-            let viewModel = convert(model: firstQuestion)
-            show(quiz: viewModel)
+        let questionFactory = QuestionFactory()
+        questionFactory.delegate = self
+        self.questionFactory = questionFactory
+        
+        self.questionFactory?.requestNextQuestion()
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
         }
     }
 }
