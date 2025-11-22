@@ -11,7 +11,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-    
+    weak var alertPresenter: MovieQuizViewControllerDelegate?
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: Any) {
@@ -42,23 +42,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.textScorePoints,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+        let model = AlertModel(title: result.title, message: result.textScorePoints, buttonText: result.buttonText) { [weak self] in
             guard let self = self else { return }
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            //заново показываем первый вопрос
-            questionFactory?.requestNextQuestion()
+            self.restartGame()
         }
-        
-        alert.addAction(action)
-        
-        self.present(alert, animated: true, completion: nil)
+        let alertPresenter = AlertPresenter()
+        alertPresenter.show(in: self, model: model)
     }
     
     private func showAnswerResult(isCorrect: Bool) {
@@ -78,9 +67,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = correctAnswers == questionsAmount ?
-            "Поздравляем, вы ответили на 10 из 10!" :
-            "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+            let text = makeResultsMessage()
             show(quiz: QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 textScorePoints: text,
@@ -89,6 +76,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
         }
+    }
+    
+    private func restartGame() {
+        self.currentQuestionIndex = 0
+        self.correctAnswers = 0
+        questionFactory?.requestNextQuestion()
+    }
+    
+    private func makeResultsMessage() -> String {
+        correctAnswers == questionsAmount ?
+        "Поздравляем, вы ответили на 10 из 10!" :
+        "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
     }
     // MARK: - Lifecycle
     override func viewDidLoad() {
