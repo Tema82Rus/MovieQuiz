@@ -16,6 +16,7 @@ final class AlertPresenter: MovieQuizViewControllerDelegate {
             message: model.message,
             preferredStyle: .alert)
         
+        
         let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
         }

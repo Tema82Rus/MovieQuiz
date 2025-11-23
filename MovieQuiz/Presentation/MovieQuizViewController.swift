@@ -12,6 +12,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     weak var alertPresenter: MovieQuizViewControllerDelegate?
+    private var statisticService: StatisticServiceProtocol?
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: Any) {
@@ -67,11 +68,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = makeResultsMessage()
+            guard let text = statisticService?.message(correct: correctAnswers, total: questionsAmount) else { return }
             show(quiz: QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 textScorePoints: text,
                 buttonText: "Сыграть еще раз?"))
+            statisticService?.store(correct: correctAnswers, total: questionsAmount)
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
@@ -84,17 +86,21 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         questionFactory?.requestNextQuestion()
     }
     
-    private func makeResultsMessage() -> String {
-        correctAnswers == questionsAmount ?
-        "Поздравляем, вы ответили на 10 из 10!" :
-        "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-    }
+    /*
+     private func makeResultsMessage() -> String {
+     correctAnswers == questionsAmount ?
+     "Поздравляем, вы ответили на 10 из 10!" :
+     "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+     }
+     */
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         let questionFactory = QuestionFactory()
         questionFactory.delegate = self
         self.questionFactory = questionFactory
+        let statisticService = StatisticService()
+        self.statisticService = statisticService
         
         self.questionFactory?.requestNextQuestion()
     }
