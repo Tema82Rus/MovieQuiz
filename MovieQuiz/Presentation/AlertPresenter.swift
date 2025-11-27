@@ -5,7 +5,6 @@
 //  Created by Artem Yaroshenko on 22.11.2025.
 //
 
-import Foundation
 import UIKit
 
 final class AlertPresenter: MovieQuizViewControllerDelegate {

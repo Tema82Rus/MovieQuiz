@@ -7,38 +7,38 @@
 
 import Foundation
 
-class QuestionFactory: QuestionFactoryProtocol {
+final class QuestionFactory: QuestionFactoryProtocol {
     weak var delegate: QuestionFactoryDelegate?
     
     private let questions: [QuizQuestion] = [
-        QuizQuestion(image: "The Godfather",
+        QuizQuestion(imageName: "The Godfather",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: true),
-        QuizQuestion(image: "The Dark Knight",
+        QuizQuestion(imageName: "The Dark Knight",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: true),
-        QuizQuestion(image: "Kill Bill",
+        QuizQuestion(imageName: "Kill Bill",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: true),
-        QuizQuestion(image: "The Avengers",
+        QuizQuestion(imageName: "The Avengers",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: true),
-        QuizQuestion(image: "Deadpool",
+        QuizQuestion(imageName: "Deadpool",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: true),
-        QuizQuestion(image: "The Green Knight",
+        QuizQuestion(imageName: "The Green Knight",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: true),
-        QuizQuestion(image: "Old",
+        QuizQuestion(imageName: "Old",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: false),
-        QuizQuestion(image: "The Ice Age Adventures of Buck Wild",
+        QuizQuestion(imageName: "The Ice Age Adventures of Buck Wild",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: false),
-        QuizQuestion(image: "Tesla",
+        QuizQuestion(imageName: "Tesla",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: false),
-        QuizQuestion(image: "Vivarium",
+        QuizQuestion(imageName: "Vivarium",
                      text: "Рейтинг этого фильма больше чем 6?",
                      correctAnswer: false),
     ]

@@ -16,21 +16,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: Any) {
-        buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
+        buttons.forEach {$0.isEnabled.toggle()}
         guard let currentQuestion = currentQuestion else { return }
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        showAnswerResult(isCorrect: currentQuestion.correctAnswer)
     }
     
     @IBAction private func noButtonClicked(_ sender: Any) {
-        buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
+        buttons.forEach {$0.isEnabled.toggle()}
         guard let currentQuestion = currentQuestion else { return }
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        showAnswerResult(isCorrect: !currentQuestion.correctAnswer)
     }
     // MARK: - Private functions
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionShip = QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(),
+        let questionShip = QuizStepViewModel(image: UIImage(named: model.imageName) ?? UIImage(),
                                              question: model.text,
                                              questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         return questionShip
@@ -44,7 +42,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func show(quiz result: QuizResultsViewModel) {
         let model = AlertModel(title: result.title, message: result.textScorePoints, buttonText: result.buttonText) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.restartGame()
         }
         let alertPresenter = AlertPresenter()
@@ -59,7 +57,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.showNextQuestionOrResults()
             self.imageView.layer.borderColor = UIColor.clear.cgColor
             self.buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
@@ -81,18 +79,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func restartGame() {
-        self.currentQuestionIndex = 0
-        self.correctAnswers = 0
+        currentQuestionIndex = 0
+        correctAnswers = 0
         questionFactory?.requestNextQuestion()
     }
-    
-    /*
-     private func makeResultsMessage() -> String {
-     correctAnswers == questionsAmount ?
-     "Поздравляем, вы ответили на 10 из 10!" :
-     "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-     }
-     */
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,9 +104,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         currentQuestion = question
         let viewModel = convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
+        DispatchQueue.main.async { self.show(quiz: viewModel) }
     }
 }
 
