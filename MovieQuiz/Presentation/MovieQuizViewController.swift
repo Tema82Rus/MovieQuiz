@@ -29,10 +29,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     // MARK: - Private functions
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionShip = QuizStepViewModel(image: UIImage(named: model.imageName) ?? UIImage(),
+        return QuizStepViewModel(image: UIImage(data: model.imageData) ?? UIImage(),
                                              question: model.text,
                                              questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionShip
     }
     
     private func show(quiz step: QuizStepViewModel) {
@@ -101,26 +100,26 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let model = AlertModel(title: "Ошибка",
                                message: message,
                                buttonText: "Попробовать ещё  раз") { [weak self] in
-            guard let self else { return }
+            guard let self = self else { return }
             
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
+            self.questionFactory?.loadData()
+            
             self.questionFactory?.requestNextQuestion()
         }
-        
-        alertPresenter?.show(in: self, model: model)
+        let alertPresenter = AlertPresenter()
+        alertPresenter.show(in: self, model: model)
     }
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
-        self.questionFactory = questionFactory
-        let statisticService = StatisticService()
-        self.statisticService = statisticService
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        statisticService = StatisticService()
         
-        self.questionFactory?.requestNextQuestion()
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -133,6 +132,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { self.show(quiz: viewModel) }
+    }
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
     }
 }
 
