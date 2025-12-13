@@ -7,15 +7,24 @@
 
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - Property
     let questionsAmount: Int = 10
     private var currentQuestionIndex = 0
     
     var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewController?
     var correctAnswers: Int = 0
-    var questionFactory: QuestionFactoryProtocol?
+    private var questionFactory: QuestionFactoryProtocol?
+    
+    // MARK: - Init
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
     
     // MARK: - Buttons
     func yesButtonClicked() {
@@ -34,6 +43,7 @@ final class MovieQuizPresenter {
     func restartGame() {
         currentQuestionIndex = 0
         correctAnswers = 0
+        questionFactory?.requestNextQuestion()
     }
     
     func switchToNextQuestion() {
@@ -42,6 +52,10 @@ final class MovieQuizPresenter {
     
     func didAnswer(isCorrectAnswer: Bool) {
         if isCorrectAnswer { correctAnswers += 1}
+    }
+    
+    func loadData() {
+        self.questionFactory?.loadData()
     }
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -57,15 +71,6 @@ final class MovieQuizPresenter {
         viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else { return }
-        
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.viewController?.show(quiz: viewModel) }
-    }
-    
     func showNextQuestionOrResults() {
         if self.isLastQuestion() {
             guard let text = viewController?.statisticService?.message(correct: correctAnswers, total: self.questionsAmount) else { return }
@@ -78,5 +83,25 @@ final class MovieQuizPresenter {
             self.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel) }
+    }
+    
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        viewController?.showNetworkError(message: error.localizedDescription)
     }
 }
