@@ -6,7 +6,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet var buttons: [UIButton]!
-    private var correctAnswers = 0
     private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
     weak var alertPresenter: MovieQuizViewControllerDelegate?
@@ -39,7 +38,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func showAnswerResult(isCorrect: Bool) {
-        if isCorrect { correctAnswers += 1}
+        presenter.didAnswer(isCorrectAnswer: isCorrect)
         
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
@@ -47,7 +46,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
-            self.presenter.correctAnswers = self.correctAnswers
             self.presenter.questionFactory = self.questionFactory
             self.presenter.showNextQuestionOrResults()
             self.imageView.layer.borderColor = UIColor.clear.cgColor
@@ -55,9 +53,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
+    private func showNextQuestionOrResults() {
+        presenter.showNextQuestionOrResults()
+    }
+
     private func restartGame() {
-        self.presenter.resetQuestionIndex()
-        correctAnswers = 0
+        self.presenter.restartGame()
         questionFactory?.requestNextQuestion()
     }
     
@@ -79,8 +80,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                buttonText: "Попробовать ещё  раз?") { [weak self] in
             guard let self else { return }
             
-            self.presenter.resetQuestionIndex()
-            self.correctAnswers = 0
+            self.presenter.restartGame()
             
             self.questionFactory?.loadData()
             
