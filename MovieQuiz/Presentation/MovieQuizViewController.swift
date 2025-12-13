@@ -70,7 +70,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             show(quiz: QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 textScorePoints: text,
-                buttonText: "Сыграть еще раз?"))
+                buttonText: "Сыграть ещё раз?"))
             statisticService?.store(correct: correctAnswers, total: questionsAmount)
         } else {
             currentQuestionIndex += 1
@@ -99,7 +99,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         let model = AlertModel(title: "Ошибка",
                                message: message,
-                               buttonText: "Попробовать ещё  раз") { [weak self] in
+                               buttonText: "Попробовать ещё  раз?") { [weak self] in
             guard let self else { return }
             
             self.currentQuestionIndex = 0
