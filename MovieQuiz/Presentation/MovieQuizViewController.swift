@@ -1,14 +1,13 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController {
-    // MARK: - Private property
+    // MARK: - Property
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet var buttons: [UIButton]!
     private var presenter: MovieQuizPresenter!
     weak var alertPresenter: MovieQuizViewControllerDelegate?
-    var statisticService: StatisticServiceProtocol?
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Actions
@@ -19,7 +18,7 @@ final class MovieQuizViewController: UIViewController {
     @IBAction private func noButtonClicked(_ sender: Any) {
         presenter.noButtonClicked()
     }
-    // MARK: - Private functions
+    // MARK: - Functions
     
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
@@ -36,23 +35,14 @@ final class MovieQuizViewController: UIViewController {
         alertPresenter.show(in: self, model: model)
     }
     
-    func showAnswerResult(isCorrect: Bool) {
-        presenter.didAnswer(isCorrectAnswer: isCorrect)
-        
+    func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self else { return }
-            self.presenter.showNextQuestionOrResults()
-            self.imageView.layer.borderColor = UIColor.clear.cgColor
-            self.buttons.forEach {$0.isEnabled.toggle()}
-        }
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
     }
     
-    private func showNextQuestionOrResults() {
-        presenter.showNextQuestionOrResults()
+    func highlightImageBorderReset() {
+        self.imageView.layer.borderColor = UIColor.clear.cgColor
     }
     
     private func restartGame() {
@@ -87,6 +77,5 @@ final class MovieQuizViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         presenter = MovieQuizPresenter(viewController: self)
-        statisticService = StatisticService()
     }
 }

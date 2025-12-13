@@ -9,17 +9,18 @@ import UIKit
 
 final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - Property
-    let questionsAmount: Int = 10
-    private var currentQuestionIndex = 0
-    
-    var currentQuestion: QuizQuestion?
-    private weak var viewController: MovieQuizViewController?
-    var correctAnswers: Int = 0
+    private let statisticService: StatisticServiceProtocol!
     private var questionFactory: QuestionFactoryProtocol?
-    
+    private weak var viewController: MovieQuizViewController?
+    private var currentQuestion: QuizQuestion?
+    private let questionsAmount: Int = 10
+    private var currentQuestionIndex = 0
+    private var correctAnswers: Int = 0
     // MARK: - Init
     init(viewController: MovieQuizViewController) {
         self.viewController = viewController
+        
+        statisticService = StatisticService()
         
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
@@ -36,7 +37,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     // MARK: - Functions
-    func isLastQuestion() -> Bool {
+    private func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
     }
     
@@ -46,11 +47,11 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         questionFactory?.requestNextQuestion()
     }
     
-    func switchToNextQuestion() {
+    private func switchToNextQuestion() {
         currentQuestionIndex += 1
     }
     
-    func didAnswer(isCorrectAnswer: Bool) {
+    private func didAnswer(isCorrectAnswer: Bool) {
         if isCorrectAnswer { correctAnswers += 1}
     }
     
@@ -58,31 +59,48 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         self.questionFactory?.loadData()
     }
     
-    func convert(model: QuizQuestion) -> QuizStepViewModel {
+    private func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(image: UIImage(data: model.imageData) ?? UIImage(),
                           question: model.text,
                           questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
-    func didAnswer(isYes: Bool) {
+    private func didAnswer(isYes: Bool) {
         viewController?.buttons.forEach {$0.isEnabled.toggle()}
         guard let currentQuestion = currentQuestion else { return }
         let givenAnswer = isYes
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    func showNextQuestionOrResults() {
+    private func proceedWithAnswer(isCorrect: Bool) {
+        didAnswer(isCorrectAnswer: isCorrect)
+        
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self else { return }
+            proceedToNextQuestionOrResults()
+            viewController?.highlightImageBorderReset()
+            viewController?.buttons.forEach {$0.isEnabled.toggle()}
+        }
+    }
+    
+    private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
-            guard let text = viewController?.statisticService?.message(correct: correctAnswers, total: self.questionsAmount) else { return }
+            let text = makeResultsMessage()
             viewController?.show(quiz: QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 textScorePoints: text,
                 buttonText: "Сыграть ещё раз?"))
-            viewController?.statisticService?.store(correct: correctAnswers, total: self.questionsAmount)
+            statisticService?.store(correct: correctAnswers, total: self.questionsAmount)
         } else {
             self.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
+    }
+
+    private func makeResultsMessage() -> String {
+        statisticService.message(correct: correctAnswers, total: self.questionsAmount)
     }
     
     // MARK: - QuestionFactoryDelegate
