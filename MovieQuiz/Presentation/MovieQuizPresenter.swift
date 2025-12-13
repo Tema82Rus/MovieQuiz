@@ -8,9 +8,27 @@
 import UIKit
 
 final class MovieQuizPresenter {
+    // MARK: - Property
     let questionsAmount: Int = 10
     private var currentQuestionIndex = 0
     
+    var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+    
+    // MARK: - Buttons
+    func yesButtonClicked() {
+        viewController?.buttons.forEach {$0.isEnabled.toggle()}
+        guard let currentQuestion = currentQuestion else { return }
+        viewController?.showAnswerResult(isCorrect: currentQuestion.correctAnswer)
+    }
+    
+    func noButtonClicked() {
+        viewController?.buttons.forEach {$0.isEnabled.toggle()}
+        guard let currentQuestion = currentQuestion else { return }
+        viewController?.showAnswerResult(isCorrect: !currentQuestion.correctAnswer)
+    }
+    
+    // MARK: - Functions
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
     }
