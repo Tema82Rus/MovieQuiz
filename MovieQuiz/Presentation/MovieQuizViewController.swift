@@ -9,30 +9,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var correctAnswers = 0
     private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     weak var alertPresenter: MovieQuizViewControllerDelegate?
-    private var statisticService: StatisticServiceProtocol?
+    var statisticService: StatisticServiceProtocol?
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: Any) {
-        presenter.currentQuestion = currentQuestion
         presenter.yesButtonClicked()
     }
     
     @IBAction private func noButtonClicked(_ sender: Any) {
-        presenter.currentQuestion = currentQuestion
         presenter.noButtonClicked()
     }
     // MARK: - Private functions
     
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
     
-    private func show(quiz result: QuizResultsViewModel) {
+    func show(quiz result: QuizResultsViewModel) {
         let model = AlertModel(title: result.title, message: result.textScorePoints, buttonText: result.buttonText) { [weak self] in
             guard let self else { return }
             self.restartGame()
@@ -50,23 +47,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
-            self.showNextQuestionOrResults()
+            self.presenter.correctAnswers = self.correctAnswers
+            self.presenter.questionFactory = self.questionFactory
+            self.presenter.showNextQuestionOrResults()
             self.imageView.layer.borderColor = UIColor.clear.cgColor
-            self.buttons.forEach {UIButton in UIButton.isEnabled.toggle()}
-        }
-    }
-    
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            guard let text = statisticService?.message(correct: correctAnswers, total: presenter.questionsAmount) else { return }
-            show(quiz: QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                textScorePoints: text,
-                buttonText: "Сыграть ещё раз?"))
-            statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
+            self.buttons.forEach {$0.isEnabled.toggle()}
         }
     }
     
@@ -118,13 +103,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - QuestionFactoryDelegate
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
-        
-        currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        DispatchQueue.main.async { self.show(quiz: viewModel) }
+        presenter.didReceiveNextQuestion(question: question)
     }
     
     func didLoadDataFromServer() {

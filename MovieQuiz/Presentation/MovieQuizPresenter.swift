@@ -14,18 +14,16 @@ final class MovieQuizPresenter {
     
     var currentQuestion: QuizQuestion?
     weak var viewController: MovieQuizViewController?
+    var correctAnswers: Int = 0
+    var questionFactory: QuestionFactoryProtocol?
     
     // MARK: - Buttons
     func yesButtonClicked() {
-        viewController?.buttons.forEach {$0.isEnabled.toggle()}
-        guard let currentQuestion = currentQuestion else { return }
-        viewController?.showAnswerResult(isCorrect: currentQuestion.correctAnswer)
+        didAnswer(isYes: true)
     }
     
     func noButtonClicked() {
-        viewController?.buttons.forEach {$0.isEnabled.toggle()}
-        guard let currentQuestion = currentQuestion else { return }
-        viewController?.showAnswerResult(isCorrect: !currentQuestion.correctAnswer)
+        didAnswer(isYes: false)
     }
     
     // MARK: - Functions
@@ -45,5 +43,35 @@ final class MovieQuizPresenter {
         QuizStepViewModel(image: UIImage(data: model.imageData) ?? UIImage(),
                           question: model.text,
                           questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    }
+    
+    func didAnswer(isYes: Bool) {
+        viewController?.buttons.forEach {$0.isEnabled.toggle()}
+        guard let currentQuestion = currentQuestion else { return }
+        let givenAnswer = isYes
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel) }
+    }
+    
+    func showNextQuestionOrResults() {
+        if self.isLastQuestion() {
+            guard let text = viewController?.statisticService?.message(correct: correctAnswers, total: self.questionsAmount) else { return }
+            viewController?.show(quiz: QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                textScorePoints: text,
+                buttonText: "Сыграть ещё раз?"))
+            viewController?.statisticService?.store(correct: correctAnswers, total: self.questionsAmount)
+        } else {
+            self.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
     }
 }
