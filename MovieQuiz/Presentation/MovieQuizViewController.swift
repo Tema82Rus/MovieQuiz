@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     // MARK: - Property
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
@@ -19,6 +19,10 @@ final class MovieQuizViewController: UIViewController {
         presenter.noButtonClicked()
     }
     // MARK: - Functions
+    
+    func toggleButtons() {
+        self.buttons.forEach {$0.isEnabled.toggle()}
+    }
     
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image

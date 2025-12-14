@@ -7,17 +7,32 @@
 
 import UIKit
 
+protocol MovieQuizViewControllerProtocol: AnyObject {
+    func show(quiz step: QuizStepViewModel)
+    func show(quiz result: QuizResultsViewModel)
+    
+    func highlightImageBorder(isCorrectAnswer: Bool)
+    func highlightImageBorderReset()
+    
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
+    
+    func showNetworkError(message: String)
+    
+    func toggleButtons()
+}
+
 final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - Property
     private let statisticService: StatisticServiceProtocol!
     private var questionFactory: QuestionFactoryProtocol?
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     private var currentQuestion: QuizQuestion?
     private let questionsAmount: Int = 10
     private var currentQuestionIndex = 0
     private var correctAnswers: Int = 0
     // MARK: - Init
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         statisticService = StatisticService()
@@ -59,14 +74,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         self.questionFactory?.loadData()
     }
     
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+    func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(image: UIImage(data: model.imageData) ?? UIImage(),
                           question: model.text,
                           questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
     private func didAnswer(isYes: Bool) {
-        viewController?.buttons.forEach {$0.isEnabled.toggle()}
+        viewController?.toggleButtons()
         guard let currentQuestion = currentQuestion else { return }
         let givenAnswer = isYes
         proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
@@ -81,7 +96,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             guard let self else { return }
             proceedToNextQuestionOrResults()
             viewController?.highlightImageBorderReset()
-            viewController?.buttons.forEach {$0.isEnabled.toggle()}
+            viewController?.toggleButtons()
         }
     }
     
