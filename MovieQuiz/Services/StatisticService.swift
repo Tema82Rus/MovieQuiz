@@ -89,5 +89,4 @@ final class StatisticService: StatisticServiceProtocol {
         """
         return message
     }
-    
 }
