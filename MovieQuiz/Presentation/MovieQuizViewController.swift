@@ -6,20 +6,19 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet var buttons: [UIButton]!
-    private var presenter: MovieQuizPresenter!
+    private var presenter: MovieQuizPresenter?
     weak var alertPresenter: MovieQuizViewControllerDelegate?
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: Any) {
-        presenter.yesButtonClicked()
+        presenter?.buttonClicked(check: true)
     }
     
     @IBAction private func noButtonClicked(_ sender: Any) {
-        presenter.noButtonClicked()
+        presenter?.buttonClicked(check: false)
     }
     // MARK: - Functions
-    
     func toggleButtons() {
         self.buttons.forEach {$0.isEnabled.toggle()}
     }
@@ -46,12 +45,10 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     }
     
     func highlightImageBorderReset() {
-        self.imageView.layer.borderColor = UIColor.clear.cgColor
+        imageView.layer.borderColor = UIColor.clear.cgColor
     }
     
-    private func restartGame() {
-        self.presenter.restartGame()
-    }
+    private func restartGame() { presenter?.restartGame() }
     
     func showLoadingIndicator() {
         activityIndicator.isHidden = false
@@ -70,9 +67,8 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
                                message: message,
                                buttonText: "Попробовать ещё  раз?") { [weak self] in
             guard let self else { return }
-            
-            self.presenter.restartGame()
-            self.presenter.loadData()
+            self.presenter?.restartGame()
+            self.presenter?.loadData()
         }
         let alertPresenter = AlertPresenter()
         alertPresenter.show(in: self, model: model)
