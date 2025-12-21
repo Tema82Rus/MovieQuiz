@@ -67,7 +67,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private func didAnswer(isYes: Bool) {
         viewController?.toggleButtons()
         guard let currentQuestion else { return }
-        proceedWithAnswer(isCorrect: currentQuestion.correctAnswer)
+        proceedWithAnswer(isCorrect: isYes == currentQuestion.correctAnswer)
     }
     
     private func proceedWithAnswer(isCorrect: Bool) {
